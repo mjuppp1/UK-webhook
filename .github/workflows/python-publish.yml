@@ -37,7 +37,7 @@ jobs:
         MY_EMAIL: ${{ secrets.MY_EMAIL }}
       run: |
         git config --local user.email $MY_EMAIL
-        git config --local user.name "dipito"
+        git config --local user.name "mjuppp1"
         git pull
         git add "recent.json"
         git commit -m "automatically updated" || echo failed
