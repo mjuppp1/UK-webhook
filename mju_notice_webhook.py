@@ -8,7 +8,7 @@ import os, sys, re
 #말그대로 rss를 파싱해주는 것
 def RSS_PARSE() -> list:
   #속보 러시아
-  parsed_rss = feedparser.parse('https://news.google.com/rss/search?q=%EC%86%8D%EB%B3%B4+%EB%9F%AC%EC%8B%9C%EC%95%84&hl=ko&gl=KR&ceid=KR:ko')
+  parsed_rss = feedparser.parse('https://news.google.com/rss/search?q=%EB%9F%AC%EC%8B%9C%EC%95%84%20%EC%9A%B0%ED%81%AC%EB%9D%BC%EC%9D%B4%EB%82%98%20%22%EC%86%8D%EB%B3%B4%22%20when%3A1h&hl=ko&gl=KR&ceid=KR%3Ako')
   rss = parsed_rss.entries
   return rss
 
