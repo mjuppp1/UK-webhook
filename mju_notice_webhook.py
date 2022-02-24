@@ -54,7 +54,16 @@ def POST_rss(rss, webhook_url):
     headers={'Content-Type' : 'application/json'})
 
 #rsss는 rss들(복수 s)라는 뜻이다.
+
+#언론사가 다르고 시간이 가장 짧은 뉴스 하나를 내보낸다는 룰을 고려해보자
+
+#시간을 입력하면 현재와의 차를 구하는 함수
+def now_minus_strtime(strtime) -> float:
+  dt_time = dt.datetime.strptime(strtime, '%a, %d %b %Y %I:%M:%S %Z')
+  dt_now = dt.now()
+  return time.mktime(dt_time.timetuple()) - time.mktime(dt_now.timetuple())
   
+
 def main():
   recent_path = "./recent.json"
   
@@ -69,11 +78,9 @@ def main():
     print("recent title:", recent["title"])
     #링크가 같으면 rsss 업데이트 후 break
     for i, rss in enumerate(rsss): 
-      if recent["link"] == rss["link"]: #and recent["summary"] == rss["summary"]:
-        if i == 0: rsss = []
-        else: rsss = rsss[i-1::-1]
-        print("'i' when for ended':", i)
-        print("break")
+      if recent["link"] != rss["link"] \
+        and recent["source"] != rss["source"]:
+        rsss = (rsss[i],)
         break
   else:
     rsss = (rsss[0],)
