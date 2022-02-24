@@ -1,4 +1,3 @@
-from prometheus_client import Summary
 import requests
 import json
 import feedparser
