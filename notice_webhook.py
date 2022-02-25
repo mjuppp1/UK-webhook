@@ -18,7 +18,7 @@ def RSS_CONTENT(rss):
   title = rss['title']
   description = rss['summary']
   link = rss['link']
-  published = rss.published
+  published = dt.datetime.strptime(rss.published, '%a, %d %b %Y %I:%M:%S %Z')
  
   #date = ':'.join(published.split(":")[:-1])
   #kor_date=dt.datetime.strptime(date,"%Y-%m-%d %H:%M")-dt.timedelta(hours=9)#디스코드가 GMT를 사용해서 그만큼 빼줘야 함.
