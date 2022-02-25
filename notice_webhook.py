@@ -5,7 +5,7 @@ import feedparser
 import datetime as dt
 import time
 import os, sys, re
-
+import dateutil.parser
 
 #말그대로 rss를 파싱해주는 것
 def RSS_PARSE() -> list:
@@ -25,7 +25,7 @@ def RSS_CONTENT(rss):
   #date = ':'.join(published.split(":")[:-1])
   #kor_date=dt.datetime.strptime(date,"%Y-%m-%d %H:%M")-dt.timedelta(hours=9)#디스코드가 GMT를 사용해서 그만큼 빼줘야 함.
   #kor_date = time.time()
-  #kor_date=str(kor_date)
+  #kor_date=str(kor_date)`~
 
   return title, description, link, published
 
@@ -61,8 +61,11 @@ def POST_rss(rss, webhook_url):
 
 #시간을 입력하면 현재와의 차를 구하는 함수
 def now_minus_strtime(strtime) -> float:
-  dt_time = dt.datetime.strptime(strtime, '%a, %d %b %Y %I:%M:%S %Z')
-  dt_now = dt.datetime.utcnow() #gmt랑 소숫점 초 차이밖에 나지 않기 때문에 굳이 GMT로 변환하여 사용하지 않는다.
+  try:
+    dt_time = dateutil.parser.parse(strtime)
+  except:
+    dt_time = dt.datetime.strptime(strtime, '%a, %d %b %Y %I:%M:%S %Z')
+  dt_now = dt.datetime.utcnow() + dt.timedelta(hours=9) #gmt랑 소숫점 초 차이밖에 나지 않기 때문에 굳이 GMT로 변환하여 사용하지 않는다. +9시간 차
   return time.mktime(dt_now.timetuple()) - time.mktime(dt_time.timetuple()) #unix time의 차로 돌려준다.
 
 #언론사 published date 리턴
@@ -70,9 +73,12 @@ def get_site_pubDate(url=str(), headers={})-> str:
     res = requests.get(
         url= url,
         headers=headers)
-    soup = BeautifulSoup(res.content)
+    soup = BeautifulSoup(res.content, "html.parser")
     pubDate = soup.find("meta", attrs={"property":"article:published_time"})
-    return pubDate.attrs.get('content')
+    if bool(pubDate):
+      return pubDate.attrs.get('content', 0)
+    else:
+      return "False"
 
 
 def main():
@@ -89,11 +95,18 @@ def main():
     print("recent title:", recent["title"])
     #링크가 같으면 rsss 업데이트 후 break
     for i, rss in enumerate(rsss): 
+      rss_timegap = get_site_pubDate(rss["link"])
+      if rss_timegap == "False":
+        rss_timegap = now_minus_strtime(rss["published"])
+      else:
+        rss_timegap = now_minus_strtime(rss_timegap)
+        
       if recent["link"] != rss["link"] \
         and recent["source"] != rss["source"] \
-          and now_minus_strtime(rss['published']) <= 2400: #unix시간은 초를 단위로 1식 올라가기 때문에 3600은 1시간을 의미한다. 2400은 40분.
-        print(now_minus_strtime(rss['published']))
-        print(str(dt.datetime.strptime(rss.published, '%a, %d %b %Y %I:%M:%S %Z') + dt.timedelta(hours=9)))
+          and rss_timegap <= 2400: #unix시간은 초를 단위로 1식 올라가기 때문에 3600은 1시간을 의미한다. 2400은 40분.
+        print("now_minus_strtime:",now_minus_strtime(rss['published']))
+        print("datetime(+9h):",str(dt.datetime.strptime(rss.published, '%a, %d %b %Y %I:%M:%S %Z') + dt.timedelta(hours=9)))
+        print("rss_timegap:",rss_timegap)
         rsss = (rsss[i],)
         break
   else:
