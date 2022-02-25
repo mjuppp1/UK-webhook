@@ -1,9 +1,11 @@
+from bs4 import BeautifulSoup
 import requests
 import json
 import feedparser
 import datetime as dt
 import time
 import os, sys, re
+
 
 #말그대로 rss를 파싱해주는 것
 def RSS_PARSE() -> list:
@@ -62,7 +64,16 @@ def now_minus_strtime(strtime) -> float:
   dt_time = dt.datetime.strptime(strtime, '%a, %d %b %Y %I:%M:%S %Z')
   dt_now = dt.datetime.utcnow() #gmt랑 소숫점 초 차이밖에 나지 않기 때문에 굳이 GMT로 변환하여 사용하지 않는다.
   return time.mktime(dt_now.timetuple()) - time.mktime(dt_time.timetuple()) #unix time의 차로 돌려준다.
-  
+
+#언론사 published date 리턴
+def get_site_pubDate(url=str(), headers={})-> str:
+    res = requests.get(
+        url= url,
+        headers=headers)
+    soup = BeautifulSoup(res.content)
+    pubDate = soup.find("meta", attrs={"property":"article:published_time"})
+    return pubDate.attrs.get('content')
+
 
 def main():
   recent_path = "./recent.json"
