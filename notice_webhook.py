@@ -61,7 +61,7 @@ def POST_rss(rss, webhook_url):
 def now_minus_strtime(strtime) -> float:
   dt_time = dt.datetime.strptime(strtime, '%a, %d %b %Y %I:%M:%S %Z')
   dt_now = dt.datetime.utcnow() #gmt랑 소숫점 초 차이밖에 나지 않기 때문에 굳이 GMT로 변환하여 사용하지 않는다.
-  return time.mktime(dt_time.timetuple()) - time.mktime(dt_now.timetuple()) #unix time의 차로 돌려준다.
+  return time.mktime(dt_now.timetuple()) - time.mktime(dt_time.timetuple()) #unix time의 차로 돌려준다.
   
 
 def main():
@@ -80,7 +80,9 @@ def main():
     for i, rss in enumerate(rsss): 
       if recent["link"] != rss["link"] \
         and recent["source"] != rss["source"] \
-          and now_minus_strtime(rss['published']) <= 3600: #unix시간은 초를 단위로 1식 올라가기 때문에 3600은 1시간을 의미한다.
+          and now_minus_strtime(rss['published']) <= 2400: #unix시간은 초를 단위로 1식 올라가기 때문에 3600은 1시간을 의미한다. 2400은 40분.
+        print(now_minus_strtime(rss['published']))
+        print(str(dt.datetime.strptime(rss.published, '%a, %d %b %Y %I:%M:%S %Z') + dt.timedelta(hours=9)))
         rsss = (rsss[i],)
         break
   else:
