@@ -18,7 +18,7 @@ def RSS_CONTENT(rss):
   title = rss['title']
   description = rss['summary']
   link = rss['link']
-  published = dt.datetime.strptime(rss.published, '%a, %d %b %Y %I:%M:%S %Z') + dt.timedelta(hours=9)
+  published = str(dt.datetime.strptime(rss.published, '%a, %d %b %Y %I:%M:%S %Z') + dt.timedelta(hours=9))
  
   #date = ':'.join(published.split(":")[:-1])
   #kor_date=dt.datetime.strptime(date,"%Y-%m-%d %H:%M")-dt.timedelta(hours=9)#디스코드가 GMT를 사용해서 그만큼 빼줘야 함.
@@ -60,8 +60,8 @@ def POST_rss(rss, webhook_url):
 #시간을 입력하면 현재와의 차를 구하는 함수
 def now_minus_strtime(strtime) -> float:
   dt_time = dt.datetime.strptime(strtime, '%a, %d %b %Y %I:%M:%S %Z')
-  dt_now = dt.now()
-  return time.mktime(dt_time.timetuple()) - time.mktime(dt_now.timetuple())
+  dt_now = dt.datetime.utcnow() #gmt랑 소숫점 초 차이밖에 나지 않기 때문에 굳이 GMT로 변환하여 사용하지 않는다.
+  return time.mktime(dt_time.timetuple()) - time.mktime(dt_now.timetuple()) #unix time의 차로 돌려준다.
   
 
 def main():
@@ -79,7 +79,8 @@ def main():
     #링크가 같으면 rsss 업데이트 후 break
     for i, rss in enumerate(rsss): 
       if recent["link"] != rss["link"] \
-        and recent["source"] != rss["source"]:
+        and recent["source"] != rss["source"] \
+          and now_minus_strtime(rss['published']) <= 3600: #unix시간은 초를 단위로 1식 올라가기 때문에 3600은 1시간을 의미한다.
         rsss = (rsss[i],)
         break
   else:
