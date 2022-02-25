@@ -37,7 +37,7 @@ def POST_rss(rss, webhook_url):
       {
         "title" : title,
         #"description" : description,
-        "url" : link,
+        "url" : link, 
         "color" : "598634",
         "footer": {
           "text": date
