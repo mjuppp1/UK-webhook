@@ -64,7 +64,7 @@ def now_minus_strtime(strtime) -> float:
   try:
     dt_time = dateutil.parser.parse(strtime)
   except:
-    dt_time = dt.datetime.strptime(strtime, '%a, %d %b %Y %I:%M:%S %Z')
+    dt_time = dt.datetime.strptime(strtime, '%a, %d %b %Y %H:%M:%S %Z') #%H: 24hours 
   dt_now = dt.datetime.utcnow() + dt.timedelta(hours=9) #gmt랑 소숫점 초 차이밖에 나지 않기 때문에 굳이 GMT로 변환하여 사용하지 않는다. +9시간 차
   return time.mktime(dt_now.timetuple()) - time.mktime(dt_time.timetuple()) #unix time의 차로 돌려준다.
 
@@ -100,12 +100,12 @@ def main():
         rss_timegap = now_minus_strtime(rss["published"])
       else:
         rss_timegap = now_minus_strtime(rss_timegap)
-        
+      
+      print("datetime(+9h):",str(dt.datetime.strptime(rss.published, '%a, %d %b %Y %H:%M:%S %Z') + dt.timedelta(hours=9)))
       if recent["link"] != rss["link"] \
         and recent["source"] != rss["source"] \
           and rss_timegap <= 2400: #unix시간은 초를 단위로 1식 올라가기 때문에 3600은 1시간을 의미한다. 2400은 40분.
         print("now_minus_strtime:",now_minus_strtime(rss['published']))
-        print("datetime(+9h):",str(dt.datetime.strptime(rss.published, '%a, %d %b %Y %I:%M:%S %Z') + dt.timedelta(hours=9)))
         print("rss_timegap:",rss_timegap)
         rsss = (rsss[i],)
         break
