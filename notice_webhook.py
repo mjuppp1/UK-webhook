@@ -74,7 +74,7 @@ def get_site_pubDate(url=str(), headers={})-> str:
         url= url,
         headers=headers)
     soup = BeautifulSoup(res.content, "html.parser")
-    pubDate = soup.find("meta", attrs={"property":"article:published_time"})
+    pubDate = soup.find(lambda x: x.name=="meta" and "published_time" in x.attrs.get('property',''))
     if bool(pubDate):
       return pubDate.attrs.get('content', 0)
     else:
